@@ -4,7 +4,7 @@ import AdditionalProblemsSection from '../../components/problem/AdditionalProble
 
 const ProblemPage = () => {
     return (
-        <div>
+        <div className="flex flex-col max-w-[74rem] mx-auto py-20 gap-20">
             <MainProblemSection />
             <ImpactSection />
             <AdditionalProblemsSection />
