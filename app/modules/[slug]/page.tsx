@@ -1,19 +1,48 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Clock, Users, Star, ChevronLeft } from "lucide-react";
+import { Clock, Users, Star, ChevronLeft, Check } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
+interface Lesson {
+  title: string;
+  duration: string;
+  completed: boolean;
+}
+
+interface Section {
+  title: string;
+  duration: string;
+  lessons: Lesson[];
+}
+
+interface Instructor {
+  name: string;
+  initials: string;
+  color: string;
+}
+
+interface Module {
+  title: string;
+  description: string;
+  duration: string;
+  enrollmentCount: number;
+  rating: number;
+  difficulty: "Beginner" | "Intermediate" | "Advanced";
+  instructors: Instructor[];
+  sections: Section[];
+}
+
 // This would typically come from your API/database
-const moduleData = {
+const moduleData: Record<string, Module> = {
   "technical-analysis-fundamentals": {
     title: "Technical Analysis Fundamentals",
     description: "Learn how to read charts, identify patterns, and make data-driven trading decisions.",
     duration: "2.5 hours",
     enrollmentCount: 2345,
     rating: 4.8,
-    difficulty: "Beginner" as "Beginner" | "Intermediate" | "Advanced",
+    difficulty: "Beginner",
     instructors: [
       { name: "John Doe", initials: "JD", color: "bg-blue-600" },
       { name: "Alice King", initials: "AK", color: "bg-purple-600" },
@@ -50,42 +79,63 @@ const moduleData = {
   },
 };
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}): Promise<Metadata> {
-  const module = moduleData[params.slug as keyof typeof moduleData];
-  if (!module) return { title: "Module Not Found" };
+type Props = {
+  params: { slug: string }
+}
+
+// Función auxiliar para obtener el módulo de forma asíncrona
+async function getModule(slug: string): Promise<Module | null> {
+  // Simular una llamada a API
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(moduleData[slug as keyof typeof moduleData] || null);
+    }, 100);
+  });
+}
+
+export async function generateMetadata(
+  { params }: Props
+): Promise<Metadata> {
+  const slug = await Promise.resolve(params?.slug);
+  const data = await getModule(slug);
+  
+  if (!data) {
+    return {
+      title: "Module Not Found - Tradoxus",
+      description: "The requested module could not be found.",
+    };
+  }
 
   return {
-    title: `${module.title} - Tradoxus Education`,
-    description: module.description,
+    title: `${data.title} - Tradoxus Education`,
+    description: data.description,
   };
 }
 
-export default function ModulePage({ params }: { params: { slug: string } }) {
-  const module = moduleData[params.slug as keyof typeof moduleData];
+export default async function ModulePage({ params }: Props) {
+  const slug = await Promise.resolve(params?.slug);
+  const module = await getModule(slug);
+  
   if (!module) notFound();
 
   const totalLessons = module.sections.reduce(
-    (acc, section) => acc + section.lessons.length,
+    (acc: number, section: Section) => acc + section.lessons.length,
     0
   );
   const completedLessons = module.sections.reduce(
-    (acc, section) =>
-      acc + section.lessons.filter((lesson) => lesson.completed).length,
+    (acc: number, section: Section) =>
+      acc + section.lessons.filter((lesson: Lesson) => lesson.completed).length,
     0
   );
 
   return (
-    <div className="container py-8 space-y-8">
+    <div className="container py-8 pl-12 space-y-8">
       <Link
-        href="/education"
+        href="/modules"
         className="inline-flex items-center text-sm text-blue-400 hover:text-blue-300"
       >
         <ChevronLeft className="h-4 w-4 mr-1" />
-        Back to Education
+        Back to Modules
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -114,14 +164,17 @@ export default function ModulePage({ params }: { params: { slug: string } }) {
                         className="flex items-center justify-between p-3 rounded-lg bg-gray-800/50"
                       >
                         <div className="flex items-center gap-3">
-                          <div
-                            className={cn(
-                              "h-4 w-4 rounded-full border",
-                              lesson.completed
-                                ? "bg-green-500/20 border-green-500"
-                                : "bg-gray-700 border-gray-600"
-                            )}
-                          />
+                          {lesson.completed ? (
+                            <div className="flex items-center justify-center h-5 w-5 rounded-full border border-green-900/50 bg-green-900/50 flex-shrink-0 text-xs font-medium">
+                              <Check className="h-4 w-3 text-green-300 flex-shrink-0" />
+                            </div>
+                          ) : (
+                            <div
+                              className="flex items-center justify-center h-5 w-5 rounded-full border border-gray-700 text-white bg-gray-800/50 flex-shrink-0 text-xs font-medium"
+                            >
+                              {lessonIndex + 1}
+                            </div>
+                          )}
                           <span className="text-sm text-gray-200">
                             {lesson.title}
                           </span>

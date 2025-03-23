@@ -9,7 +9,7 @@ export default function ModuleNotFound() {
         The module you're looking for doesn't exist or has been removed.
       </p>
       <Link
-        href="/education"
+        href="/modules"
         className="inline-flex items-center text-blue-400 hover:text-blue-300"
       >
         <ChevronLeft className="h-4 w-4 mr-1" />

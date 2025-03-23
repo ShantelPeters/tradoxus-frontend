@@ -68,6 +68,7 @@ const learningPaths = [
 
 const featuredModules = [
   {
+    slug: "technical-analysis-fundamentals",
     title: "Technical Analysis Fundamentals",
     description: "Learn how to read charts, identify patterns, and make data-driven trading decisions.",
     icon: LineChart,
@@ -81,6 +82,7 @@ const featuredModules = [
     ],
   },
   {
+    slug: "defi-yield-strategies",
     title: "DeFi Yield Strategies",
     description: "Explore different yield farming strategies and learn how to maximize returns while managing risks.",
     icon: Wallet,
@@ -94,6 +96,7 @@ const featuredModules = [
     ],
   },
   {
+    slug: "risk-management-for-traders",
     title: "Risk Management for Traders",
     description: "Master essential risk management techniques to protect your capital and improve trading outcomes.",
     icon: ShieldCheck,
