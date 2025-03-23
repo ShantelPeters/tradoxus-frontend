@@ -24,7 +24,7 @@ export function Header() {
 	const pathname = usePathname();
 
 	return (
-		<header className="border-b border-gray-800 relative z-50">
+		<header className="border-b border-gray-800 bg-gray-950 text-gray-100 relative z-50">
 			<div className="container mx-auto px-4 py-4">
 				<div className="flex items-center justify-between">
 					{/* Website Logo */}
