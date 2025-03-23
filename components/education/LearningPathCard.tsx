@@ -1,4 +1,4 @@
-import { CheckCircle, Circle, type LucideIcon } from "lucide-react";
+import { Check, CheckCircle, Circle, CircleCheck, type LucideIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -95,7 +95,9 @@ export function LearningPathCard({
               className="flex items-center gap-3 text-sm text-gray-300"
             >
               {module.completed ? (
-                <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                <div className="flex items-center justify-center h-5 w-5 rounded-full border border-green-900/50 bg-green-900/50 flex-shrink-0 text-xs font-medium">
+                  <Check className="h-4 w-3 text-green-300 flex-shrink-0" />
+                </div>
               ) : (
                 <div
                   className="flex items-center justify-center h-5 w-5 rounded-full border border-gray-700 bg-gray-800/50 flex-shrink-0 text-xs font-medium"

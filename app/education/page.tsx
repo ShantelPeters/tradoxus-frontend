@@ -6,6 +6,7 @@ import {
   ChartNoAxesColumn,
   Zap,
   Layers,
+  ChevronRight,
 } from "lucide-react";
 import { LearningPathCard } from "@/components/education/LearningPathCard";
 import { FeaturedModuleCard } from "@/components/education/FeaturedModuleCard";
@@ -127,9 +128,10 @@ export default function EducationPage() {
               <h2 className="text-2xl font-bold text-white">Featured Modules</h2>
               <a
                 href="/education/modules"
-                className="text-blue-400 hover:text-blue-300 text-sm font-medium"
+                className="flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-medium"
               >
                 View all modules
+                <ChevronRight className="h-4 w-4" />
               </a>
             </div>
 
