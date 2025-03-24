@@ -1,4 +1,4 @@
-import { type LucideIcon, Clock, Users, Star, Award } from "lucide-react";
+import { type LucideIcon, Clock, Users, Award } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -29,7 +29,6 @@ export function FeaturedModuleCard({
   enrollmentCount,
   rating,
   instructors,
-  icon: Icon,
 }: FeaturedModuleCardProps) {
   const difficultyColors = {
     Beginner: "bg-blue-500/10 text-blue-500",

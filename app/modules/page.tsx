@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { LearningPathCard } from "@/components/education/LearningPathCard";
 import { FeaturedModuleCard } from "@/components/education/FeaturedModuleCard";
-
+import { GetStartedAction } from "@/components/education/GetStartedAction";
 export const metadata: Metadata = {
   title: "Education - Tradoxus",
   description: "Master trading with our structured educational modules and learning paths",
@@ -143,6 +143,8 @@ export default function EducationPage() {
                 <FeaturedModuleCard key={index} {...module} />
               ))}
             </div>
+
+            <GetStartedAction />
           </div>
         </div>
       </div>

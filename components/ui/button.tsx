@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Button = ({ children, onClick, href }) => {
+const Button = ({ children, onClick, href }: { children: React.ReactNode, onClick: () => void, href: string }) => {
     return (
         <a
             href={href}
