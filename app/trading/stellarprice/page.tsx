@@ -320,7 +320,7 @@ export default function StellarPriceChart() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
             <div className="flex items-center gap-2">
               <img 
-                src="chart.png" 
+                src="/chart.png" 
                 alt="chart" 
                 className={`w-6 h-6 ${isDark ? 'invert' : 'opacity-80'}`}
               /> 
@@ -400,7 +400,7 @@ export default function StellarPriceChart() {
           }`}>
             <h4 className="font-medium mb-3 flex items-center gap-2">
               <img 
-                src="trend.png" 
+                src="/trend.png" 
                 alt="chart" 
                 className={`w-5 h-5 ${isDark ? 'invert' : 'opacity-80'}`}
               /> 
@@ -432,7 +432,7 @@ export default function StellarPriceChart() {
               : 'bg-gray-700 text-white hover:bg-gray-600'
           }`}>
             <img 
-              src="book.png" 
+              src="/book.png" 
               alt="chart" 
               className="w-6 h-6 invert"
             /> 
@@ -461,7 +461,7 @@ export default function StellarPriceChart() {
               }`}>
                 <div className="flex items-center gap-2">
                   <img 
-                    src="information.png" 
+                    src="/information.png" 
                     alt="info" 
                     className={`w-5 h-5 ${isDark ? 'invert' : 'opacity-90'}`}
                   />
@@ -484,7 +484,7 @@ export default function StellarPriceChart() {
               >
                 <div className="flex items-center gap-2">
                   <img 
-                    src="chart.png" 
+                    src="/chart.png" 
                     alt="chart" 
                     className={`w-5 h-5 ${isDark ? 'invert' : 'opacity-90'}`}
                   />
@@ -540,7 +540,7 @@ export default function StellarPriceChart() {
               >
                 <div className="flex items-center gap-2">
                   <img 
-                    src="trend.png" 
+                    src="/trend.png" 
                     alt="trend" 
                     className={`w-5 h-5 ${isDark ? 'invert' : 'opacity-90'}`}
                   />
@@ -602,7 +602,7 @@ export default function StellarPriceChart() {
               >
                 <div className="flex items-center gap-2">
                   <img 
-                    src="down-arrow.png" 
+                    src="/down-arrow.png" 
                     alt="volume" 
                     className={`w-5 h-5 ${isDark ? 'invert' : 'opacity-90'}`}
                   />
@@ -661,7 +661,7 @@ export default function StellarPriceChart() {
               >
                 <div className="flex items-center gap-2">
                   <img 
-                    src="information.png" 
+                    src="/information.png" 
                     alt="chart" 
                     className={`w-5 h-5 ${isDark ? 'invert' : 'opacity-90'}`}
                   />
