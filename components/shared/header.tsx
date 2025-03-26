@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useRef, useEffect } from "react";
 
 // Navigation structure with dropdowns
 const navigationStructure = [
@@ -124,158 +124,166 @@ export function Header() {
     "py-2 px-3 rounded-md hover:bg-gray-800 transition-colors block w-full text-center";
 
   return (
-    <header className="border-b border-gray-800 bg-transparent relative z-50 w-full">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          {/* Website Logo */}
-          <h1 className="text-xl font-bold text-white ml-[3%]">Tradoxus</h1>
+    <header className="relative bg-[#050a14] py-4 px-6">
+      <div className="flex justify-between items-center relative z-50">
+        {/* Logo */}
+        <Link href="/" className="text-2xl font-bold text-[#18b6e8]">
+          Tradoxus
+        </Link>
 
-          {/* Mobile menu toggle button */}
-          <button
-            type="button"
-            className="md:hidden text-gray-400 hover:text-white transition-colors"
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+        {/* Mobile menu toggle button */}
+        <button
+          type="button"
+          className="md:hidden text-white"
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
+        {/* Desktop Navigation */}
+        <nav 
+          ref={navRef}
+          className="hidden md:flex space-x-10 items-center"
+        >
+          {navigationStructure.map((item) => (
+            <div
+              key={item.name}
+              className="relative pr-0 md:pr-2"
+              ref={(el) => {
+                if (item.dropdown) {
+                  dropdownRefs.current[item.name] = el;
+                }
+              }}
+            >
+              {item.dropdown ? (
+                <>
+                  <button
+                    className={`flex items-center gap-1 transition-colors ${
+                      isActiveDropdown(item.items || [])
+                        ? activeClass
+                        : inactiveClass
+                    }`}
+                    onClick={() => toggleDropdown(item.name)}
+                    onMouseEnter={() => handleMouseEnter(item.name)}
+                    aria-expanded={openDropdowns[item.name]}
+                    aria-haspopup="true"
+                  >
+                    {item.name}
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+
+                  {/* Desktop dropdown menu */}
+                  {openDropdowns[item.name] && (
+                    <div
+                      className="absolute px-2 mt-5 ml-[-20px] w-[120px] bg-gray-900 border border-gray-800 rounded-md shadow-lg py-2 animate-in fade-in-100 duration-500"
+                      onMouseLeave={() => closeAllDropdowns()}
+                    >
+                      {item.items?.map((subItem) => (
+                        <Link
+                          key={subItem.path}
+                          href={subItem.path}
+                          className={`${dropdownItemClass} ${
+                            isActivePath(subItem.path)
+                              ? activeClass
+                              : inactiveClass
+                          }`}
+                          onClick={() => closeAllDropdowns()}
+                        >
+                          {subItem.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Link
+                  href={item.path}
+                  className={`transition-colors ${
+                    isActivePath(item.path) ? activeClass : inactiveClass
+                  }`}
+                  onMouseEnter={() => closeAllDropdowns()}
+                >
+                  {item.name}
+                </Link>
+              )}
+            </div>
+          ))}
+        </nav>
+
+        {/* Connect Wallet Button (Desktop) */}
+        <div className="hidden md:block">
+          <button className="bg-[#18b6e8] text-white px-4 py-2 rounded hover:bg-[#0e9ed0] transition">
+            Connect Wallet
           </button>
+        </div>
+      </div>
 
-          {/* Desktop navigation menu */}
-          <nav
-            ref={navRef}
-            className="hidden md:flex items-center space-x-10 text-sm mr-[3%]"
-          >
+      {/* Mobile Navigation */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 top-[72px] bg-[#050a14] z-40">
+          <nav className="flex flex-col py-4 px-4">
             {navigationStructure.map((item) => (
-              <div
-                key={item.name}
-                className="relative pr-0 md:pr-2"
-                ref={(el) => {
-                  if (item.dropdown) {
-                    dropdownRefs.current[item.name] = el;
-                  }
-                }}
-              >
+              <div key={item.name} className="py-1">
                 {item.dropdown ? (
-                  <>
+                  <div className="w-full">
                     <button
-                      className={`flex items-center gap-1 transition-colors ${
+                      className={`flex items-center justify-between w-full py-3 px-4 rounded-md hover:bg-gray-800 transition-colors ${
                         isActiveDropdown(item.items || [])
                           ? activeClass
                           : inactiveClass
                       }`}
                       onClick={() => toggleDropdown(item.name)}
-                      onMouseEnter={() => handleMouseEnter(item.name)}
                       aria-expanded={openDropdowns[item.name]}
-                      aria-haspopup="true"
                     >
                       {item.name}
-                      <ChevronDown className="h-4 w-4" />
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform ${
+                          openDropdowns[item.name] ? "rotate-180" : ""
+                        }`}
+                      />
                     </button>
 
-                    {/* Desktop dropdown menu */}
                     {openDropdowns[item.name] && (
-                      <div
-                        className="absolute px-2 mt-5 ml-[-20px] w-[120px] bg-gray-900 border border-gray-800 rounded-md shadow-lg py-2 animate-in fade-in-100 duration-500"
-                        onMouseLeave={() => closeAllDropdowns()}
-                      >
+                      <div className="pl-4 mt-1 border-l border-gray-800 ml-4 space-y-1">
                         {item.items?.map((subItem) => (
                           <Link
                             key={subItem.path}
                             href={subItem.path}
-                            className={`${dropdownItemClass} ${
+                            className={`py-2 px-4 rounded-md block hover:bg-gray-800 transition-colors ${
                               isActivePath(subItem.path)
                                 ? activeClass
                                 : inactiveClass
                             }`}
-                            onClick={() => closeAllDropdowns()}
+                            onClick={() => setMobileMenuOpen(false)}
                           >
                             {subItem.name}
                           </Link>
                         ))}
                       </div>
                     )}
-                  </>
+                  </div>
                 ) : (
                   <Link
                     href={item.path}
-                    className={`transition-colors ${
+                    className={`py-3 px-4 rounded-md block hover:bg-gray-800 transition-colors ${
                       isActivePath(item.path) ? activeClass : inactiveClass
                     }`}
-                    onMouseEnter={() => closeAllDropdowns()}
+                    onClick={() => setMobileMenuOpen(false)}
                   >
                     {item.name}
                   </Link>
                 )}
               </div>
             ))}
+
+            {/* Mobile Connect Wallet Button */}
+            <button className="bg-[#18b6e8] text-white px-4 py-2 rounded hover:bg-[#0e9ed0] transition w-full mt-2">
+              Connect Wallet
+            </button>
           </nav>
         </div>
-
-        {/* Mobile navigation menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden absolute left-0 right-0 top-full bg-gray-900 border-b border-gray-800 shadow-lg animate-in slide-in-from-top-5 duration-300 w-full">
-            <nav className="flex flex-col py-4 px-4">
-              {navigationStructure.map((item) => (
-                <div key={item.name} className="py-1">
-                  {item.dropdown ? (
-                    <div className="w-full">
-                      <button
-                        className={`flex items-center justify-between w-full py-3 px-4 rounded-md hover:bg-gray-800 transition-colors ${
-                          isActiveDropdown(item.items || [])
-                            ? activeClass
-                            : inactiveClass
-                        }`}
-                        onClick={() => toggleDropdown(item.name)}
-                        aria-expanded={openDropdowns[item.name]}
-                      >
-                        {item.name}
-                        <ChevronDown
-                          className={`h-4 w-4 transition-transform ${
-                            openDropdowns[item.name] ? "rotate-180" : ""
-                          }`}
-                        />
-                      </button>
-
-                      {openDropdowns[item.name] && (
-                        <div className="pl-4 mt-1 border-l border-gray-800 ml-4 space-y-1">
-                          {item.items?.map((subItem) => (
-                            <Link
-                              key={subItem.path}
-                              href={subItem.path}
-                              className={`py-2 px-4 rounded-md block hover:bg-gray-800 transition-colors ${
-                                isActivePath(subItem.path)
-                                  ? activeClass
-                                  : inactiveClass
-                              }`}
-                              onClick={() => setMobileMenuOpen(false)}
-                            >
-                              {subItem.name}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <Link
-                      href={item.path}
-                      className={`py-3 px-4 rounded-md block hover:bg-gray-800 transition-colors ${
-                        isActivePath(item.path) ? activeClass : inactiveClass
-                      }`}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {item.name}
-                    </Link>
-                  )}
-                </div>
-              ))}
-            </nav>
-          </div>
-        )}
-      </div>
+      )}
     </header>
   );
 }
