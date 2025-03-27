@@ -94,7 +94,7 @@ export function usePriceData(timeRange: string, currency: string) {
 export default function StellarPriceChart() {
   const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('Moving Averages');
-  const [expandedSection, setExpandedSection] = useState('');
+  const [expandedSection, setExpandedSection] = useState<string>('');
   const [chartState, setChartState] = useState<ChartState>({
     timeRange: '7d',
     currency: 'USD',
@@ -454,11 +454,14 @@ export default function StellarPriceChart() {
 
           <div className="space-y-2">
             <div className={`border ${isDark ? 'border-gray-800' : 'border-gray-300'} rounded-lg`}>
-              <button className={`w-full px-4 py-3 flex items-center justify-between transition-colors rounded-lg ${
-                isDark 
-                  ? 'hover:bg-gray-800/50 text-white' 
-                  : 'hover:bg-gray-100 text-gray-800'
-              }`}>
+              <button 
+                className={`w-full px-4 py-3 flex items-center justify-between transition-colors rounded-lg ${
+                  isDark 
+                    ? 'hover:bg-gray-800/50 text-white' 
+                    : 'hover:bg-gray-100 text-gray-800'
+                }`}
+                onClick={() => setExpandedSection(expandedSection === 'stellar-info' ? '' : 'stellar-info')}
+              >
                 <div className="flex items-center gap-2">
                   <img 
                     src="/information.png" 
@@ -471,6 +474,17 @@ export default function StellarPriceChart() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
+              
+              {expandedSection === 'stellar-info' && (
+                <div className={`px-4 py-3 border-t ${isDark ? 'border-gray-800' : 'border-gray-300'}`}>
+                  <h4 className="font-medium mb-2">What is Stellar (XLM)?</h4>
+                  <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-700'}`}>
+                    Stellar (XLM) is a decentralized protocol for transferring digital currency to fiat money across borders. 
+                    Stellar aims to facilitate cross-border transactions between any currencies. 
+                    It was created by the Stellar Development Foundation, which aims to promote financial inclusion and provide access to financial services for the unbanked.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className={`border ${isDark ? 'border-gray-800' : 'border-gray-300'} rounded-lg`}>
