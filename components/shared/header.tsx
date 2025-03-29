@@ -1,9 +1,10 @@
 "use client";
 
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X, LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
+import { WalletConnectionModal } from "./walletConnect";
 
 // Navigation structure with dropdowns
 const navigationStructure = [
@@ -37,13 +38,18 @@ const navigationStructure = [
       { name: "Profile", path: "/profile" },
     ],
   },
-];
+];useState
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>(
     {}
   );
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
+  const [connectedWallet, setConnectedWallet] = useState<{
+    type: string;
+    address: string;
+  } | null>(null);
   const pathname = usePathname();
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const navRef = useRef<HTMLElement>(null);
@@ -117,6 +123,72 @@ export function Header() {
     };
   }, []);
 
+  useEffect(() => {
+    const savedWallet = localStorage.getItem('connectedWallet');
+    if (savedWallet) {
+      try {
+        setConnectedWallet(JSON.parse(savedWallet));
+        verifyWalletConnection(JSON.parse(savedWallet));
+      } catch (e) {
+        console.error("Error parsing saved wallet:", e);
+        localStorage.removeItem('connectedWallet');
+      }
+    }
+  }, []);
+
+  // Verify that the wallet connection is still valid
+  const verifyWalletConnection = async (wallet: { type: string; address: string }) => {
+    try {
+      if (wallet.type === 'metamask' && window.ethereum) {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (!accounts || accounts.length === 0 || accounts[0].toLowerCase() !== wallet.address.toLowerCase()) {
+          disconnectWallet();
+        }
+      } else if (wallet.type === 'coinbase' && window.coinbaseWalletExtension) {
+        const accounts = await window.coinbaseWalletExtension.request({ method: 'eth_accounts' });
+        if (!accounts || accounts.length === 0 || accounts[0].toLowerCase() !== wallet.address.toLowerCase()) {
+          disconnectWallet();
+        }
+      } else if (wallet.type === 'stellar' && window.rabet) {
+        const response = await window.rabet.connect();
+        if (!response) {
+          disconnectWallet();
+        } else {
+          const publicKey = response.publicKey;
+          if (publicKey !== wallet.address) {
+            disconnectWallet();
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Error verifying wallet connection:", e);
+      disconnectWallet();
+    }
+  };
+
+  // Disconnect wallet
+  const disconnectWallet = () => {
+    setConnectedWallet(null);
+    localStorage.removeItem('connectedWallet');
+  };
+
+  // Format address for display
+  const formatAddress = (address: string): string => {
+    if (!address) return '';
+    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+  };
+
+  // Handler for wallet connection
+  const handleWalletConnect = (walletId: string, address: string) => {
+    console.log(`Connected to ${walletId} wallet with address ${address}`);
+    const wallet = {
+      type: walletId,
+      address: address
+    };
+    setConnectedWallet(wallet);
+    localStorage.setItem('connectedWallet', JSON.stringify(wallet));
+  };
+
   // Style classes
   const activeClass = "text-blue-400 font-medium";
   const inactiveClass = "text-gray-300 hover:text-white";
@@ -124,166 +196,212 @@ export function Header() {
     "py-2 px-3 rounded-md hover:bg-gray-800 transition-colors block w-full text-center";
 
   return (
-    <header className="relative bg-[#050a14] py-4 px-6">
-      <div className="flex justify-between items-center relative z-50">
-        {/* Logo */}
-        <Link href="/" className="text-2xl font-bold text-[#18b6e8]">
-          Tradoxus
-        </Link>
+    <>
+      <header className="relative bg-[#050a14] py-4 px-6">
+        <div className="flex justify-between items-center relative z-50">
+          {/* Logo */}
+          <Link href="/" className="text-2xl font-bold text-[#18b6e8]">
+            Tradoxus
+          </Link>
 
-        {/* Mobile menu toggle button */}
-        <button
-          type="button"
-          className="md:hidden text-white"
-          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-
-        {/* Desktop Navigation */}
-        <nav 
-          ref={navRef}
-          className="hidden md:flex space-x-10 items-center"
-        >
-          {navigationStructure.map((item) => (
-            <div
-              key={item.name}
-              className="relative pr-0 md:pr-2"
-              ref={(el) => {
-                if (item.dropdown) {
-                  dropdownRefs.current[item.name] = el;
-                }
-              }}
-            >
-              {item.dropdown ? (
-                <>
-                  <button
-                    className={`flex items-center gap-1 transition-colors ${
-                      isActiveDropdown(item.items || [])
-                        ? activeClass
-                        : inactiveClass
-                    }`}
-                    onClick={() => toggleDropdown(item.name)}
-                    onMouseEnter={() => handleMouseEnter(item.name)}
-                    aria-expanded={openDropdowns[item.name]}
-                    aria-haspopup="true"
-                  >
-                    {item.name}
-                    <ChevronDown className="h-4 w-4" />
-                  </button>
-
-                  {/* Desktop dropdown menu */}
-                  {openDropdowns[item.name] && (
-                    <div
-                      className="absolute px-2 mt-5 ml-[-20px] w-[120px] bg-gray-900 border border-gray-800 rounded-md shadow-lg py-2 animate-in fade-in-100 duration-500"
-                      onMouseLeave={() => closeAllDropdowns()}
-                    >
-                      {item.items?.map((subItem) => (
-                        <Link
-                          key={subItem.path}
-                          href={subItem.path}
-                          className={`${dropdownItemClass} ${
-                            isActivePath(subItem.path)
-                              ? activeClass
-                              : inactiveClass
-                          }`}
-                          onClick={() => closeAllDropdowns()}
-                        >
-                          {subItem.name}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <Link
-                  href={item.path}
-                  className={`transition-colors ${
-                    isActivePath(item.path) ? activeClass : inactiveClass
-                  }`}
-                  onMouseEnter={() => closeAllDropdowns()}
-                >
-                  {item.name}
-                </Link>
-              )}
-            </div>
-          ))}
-        </nav>
-
-        {/* Connect Wallet Button (Desktop) */}
-        <div className="hidden md:block">
-          <button className="bg-[#18b6e8] text-white px-4 py-2 rounded hover:bg-[#0e9ed0] transition">
-            Connect Wallet
+          {/* Mobile menu toggle button */}
+          <button
+            type="button"
+            className="md:hidden text-white"
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
-        </div>
-      </div>
 
-      {/* Mobile Navigation */}
-      {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-[72px] bg-[#050a14] z-40">
-          <nav className="flex flex-col py-4 px-4">
+          {/* Desktop Navigation */}
+          <nav 
+            ref={navRef}
+            className="hidden md:flex space-x-10 items-center"
+          >
             {navigationStructure.map((item) => (
-              <div key={item.name} className="py-1">
+              <div
+                key={item.name}
+                className="relative pr-0 md:pr-2"
+                ref={(el) => {
+                  if (item.dropdown) {
+                    dropdownRefs.current[item.name] = el;
+                  }
+                }}
+              >
                 {item.dropdown ? (
-                  <div className="w-full">
+                  <>
                     <button
-                      className={`flex items-center justify-between w-full py-3 px-4 rounded-md hover:bg-gray-800 transition-colors ${
+                      className={`flex items-center gap-1 transition-colors ${
                         isActiveDropdown(item.items || [])
                           ? activeClass
                           : inactiveClass
                       }`}
                       onClick={() => toggleDropdown(item.name)}
+                      onMouseEnter={() => handleMouseEnter(item.name)}
                       aria-expanded={openDropdowns[item.name]}
+                      aria-haspopup="true"
                     >
                       {item.name}
-                      <ChevronDown
-                        className={`h-4 w-4 transition-transform ${
-                          openDropdowns[item.name] ? "rotate-180" : ""
-                        }`}
-                      />
+                      <ChevronDown className="h-4 w-4" />
                     </button>
 
+                    {/* Desktop dropdown menu */}
                     {openDropdowns[item.name] && (
-                      <div className="pl-4 mt-1 border-l border-gray-800 ml-4 space-y-1">
+                      <div
+                        className="absolute px-2 mt-5 ml-[-20px] w-[120px] bg-gray-900 border border-gray-800 rounded-md shadow-lg py-2 animate-in fade-in-100 duration-500"
+                        onMouseLeave={() => closeAllDropdowns()}
+                      >
                         {item.items?.map((subItem) => (
                           <Link
                             key={subItem.path}
                             href={subItem.path}
-                            className={`py-2 px-4 rounded-md block hover:bg-gray-800 transition-colors ${
+                            className={`${dropdownItemClass} ${
                               isActivePath(subItem.path)
                                 ? activeClass
                                 : inactiveClass
                             }`}
-                            onClick={() => setMobileMenuOpen(false)}
+                            onClick={() => closeAllDropdowns()}
                           >
                             {subItem.name}
                           </Link>
                         ))}
                       </div>
                     )}
-                  </div>
+                  </>
                 ) : (
                   <Link
                     href={item.path}
-                    className={`py-3 px-4 rounded-md block hover:bg-gray-800 transition-colors ${
+                    className={`transition-colors ${
                       isActivePath(item.path) ? activeClass : inactiveClass
                     }`}
-                    onClick={() => setMobileMenuOpen(false)}
+                    onMouseEnter={() => closeAllDropdowns()}
                   >
                     {item.name}
                   </Link>
                 )}
               </div>
             ))}
-
-            {/* Mobile Connect Wallet Button */}
-            <button className="bg-[#18b6e8] text-white px-4 py-2 rounded hover:bg-[#0e9ed0] transition w-full mt-2">
-              Connect Wallet
-            </button>
           </nav>
+
+          {/* Connect Wallet Button or Wallet Info (Desktop) */}
+          <div className="hidden md:block">
+            {connectedWallet ? (
+              <div className="flex items-center">
+                <div className="px-3 py-1 mr-2 rounded bg-[#0d1424] text-[#18b6e8]">
+                  {formatAddress(connectedWallet.address)}
+                </div>
+                <button 
+                  className="bg-[#18b6e8]/10 text-[#18b6e8] p-2 rounded hover:bg-[#18b6e8]/20 transition"
+                  onClick={disconnectWallet}
+                  title="Disconnect wallet"
+                >
+                  <LogOut size={18} />
+                </button>
+              </div>
+            ) : (
+              <button 
+                className="bg-[#18b6e8] text-white px-4 py-2 rounded hover:bg-[#0e9ed0] transition"
+                onClick={() => setWalletModalOpen(true)}
+              >
+                Connect Wallet
+              </button>
+            )}
+          </div>
         </div>
-      )}
-    </header>
+
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
+          <div className="md:hidden fixed inset-0 top-[72px] bg-[#050a14] z-40">
+            <nav className="flex flex-col py-4 px-4">
+              {navigationStructure.map((item) => (
+                <div key={item.name} className="py-1">
+                  {item.dropdown ? (
+                    <div className="w-full">
+                      <button
+                        className={`flex items-center justify-between w-full py-3 px-4 rounded-md hover:bg-gray-800 transition-colors ${
+                          isActiveDropdown(item.items || [])
+                            ? activeClass
+                            : inactiveClass
+                        }`}
+                        onClick={() => toggleDropdown(item.name)}
+                        aria-expanded={openDropdowns[item.name]}
+                      >
+                        {item.name}
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${
+                            openDropdowns[item.name] ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+
+                      {openDropdowns[item.name] && (
+                        <div className="pl-4 mt-1 border-l border-gray-800 ml-4 space-y-1">
+                          {item.items?.map((subItem) => (
+                            <Link
+                              key={subItem.path}
+                              href={subItem.path}
+                              className={`py-2 px-4 rounded-md block hover:bg-gray-800 transition-colors ${
+                                isActivePath(subItem.path)
+                                  ? activeClass
+                                  : inactiveClass
+                              }`}
+                              onClick={() => setMobileMenuOpen(false)}
+                            >
+                              {subItem.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <Link
+                      href={item.path}
+                      className={`py-3 px-4 rounded-md block hover:bg-gray-800 transition-colors ${
+                        isActivePath(item.path) ? activeClass : inactiveClass
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
+                  )}
+                </div>
+              ))}
+
+              {/* Mobile Connect Wallet Button or Wallet Info */}
+              {connectedWallet ? (
+                <div className="flex items-center justify-between mt-2 p-3 bg-[#0d1424] rounded-md">
+                  <div className="text-[#18b6e8]">
+                    {formatAddress(connectedWallet.address)}
+                  </div>
+                  <button 
+                    className="bg-[#18b6e8]/10 text-[#18b6e8] p-2 rounded hover:bg-[#18b6e8]/20 transition"
+                    onClick={disconnectWallet}
+                  >
+                    <LogOut size={18} />
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  className="bg-[#18b6e8] text-white px-4 py-2 rounded hover:bg-[#0e9ed0] transition w-full mt-2"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setWalletModalOpen(true);
+                  }}
+                >
+                  Connect Wallet
+                </button>
+              )}
+            </nav>
+          </div>
+        )}
+      </header>
+      {/* Wallet Connection Modal */}
+      <WalletConnectionModal 
+        isOpen={walletModalOpen}
+        onClose={() => setWalletModalOpen(false)}
+        onConnect={handleWalletConnect}
+      />
+    </>
   );
 }
