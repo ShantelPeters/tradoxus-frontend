@@ -150,14 +150,21 @@ export function useWallet(): UseWalletReturn {
         if (!window.ethereum) {
           throw new Error("MetaMask is not installed");
         }
-
-        const metamask = (window.ethereum as any).providers.find((provider: any) => provider.isMetaMask);
+  
+        let accounts: any[] = [];
         
-        const accounts = await metamask.request({
-          method: 'eth_requestAccounts'
-        });
-
-        console.log("Meta: ", accounts);
+        if ('providers' in window.ethereum) {
+          const metamask = (window.ethereum as any).providers.find((provider: any) => provider.isMetaMask);
+          if (metamask) {
+            accounts = await metamask.request({
+              method: 'eth_requestAccounts'
+            });
+          }
+        } else {
+          accounts = await window.ethereum.request({
+            method: 'eth_requestAccounts'
+          });
+        }
         
         if (!accounts || accounts.length === 0) {
           throw new Error("No accounts found");
@@ -177,7 +184,7 @@ export function useWallet(): UseWalletReturn {
         const accounts = await window.coinbaseWalletExtension.request({
           method: 'eth_requestAccounts'
         });
-
+  
         console.log("Coin: ", accounts);
         
         if (!accounts || accounts.length === 0) {
