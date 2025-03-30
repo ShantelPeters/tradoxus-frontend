@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ChevronRight, X } from "lucide-react";
-import Image from "next/image";
 
 interface WalletOption {
   id: string;

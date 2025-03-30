@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { WalletConnectionModal } from "./walletConnect";
 import { useWallet } from "../../hooks/use-wallet";
+import { formatAddress } from "../../lib/wallet-utils";
 
 // Navigation structure with dropdowns
 const navigationStructure = [
@@ -132,71 +133,7 @@ export function Header() {
     };
   }, []);
 
-  /*useEffect(() => {
-    const savedWallet = localStorage.getItem('connectedWallet');
-    if (savedWallet) {
-      try {
-        setConnectedWallet(JSON.parse(savedWallet));
-        verifyWalletConnection(JSON.parse(savedWallet));
-      } catch (e) {
-        console.error("Error parsing saved wallet:", e);
-        localStorage.removeItem('connectedWallet');
-      }
-    }
-  }, []);
-
-  // Verify that the wallet connection is still valid
-  const verifyWalletConnection = async (wallet: { type: string; address: string }) => {
-    try {
-      if (wallet.type === 'metamask' && window.ethereum) {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        if (!accounts || accounts.length === 0 || accounts[0].toLowerCase() !== wallet.address.toLowerCase()) {
-          disconnectWallet();
-        }
-      } else if (wallet.type === 'coinbase' && window.coinbaseWalletExtension) {
-        const accounts = await window.coinbaseWalletExtension.request({ method: 'eth_accounts' });
-        if (!accounts || accounts.length === 0 || accounts[0].toLowerCase() !== wallet.address.toLowerCase()) {
-          disconnectWallet();
-        }
-      } else if (wallet.type === 'stellar' && window.rabet) {
-        const response = await window.rabet.connect();
-        if (!response) {
-          disconnectWallet();
-        } else {
-          const publicKey = response.publicKey;
-          if (publicKey !== wallet.address) {
-            disconnectWallet();
-          }
-        }
-      }
-    } catch (e) {
-      console.error("Error verifying wallet connection:", e);
-      disconnectWallet();
-    }
-  };
-
-  // Disconnect wallet
-  const disconnectWallet = () => {
-    setConnectedWallet(null);
-    localStorage.removeItem('connectedWallet');
-  };*/
-
-  // Format address for display
-  const formatAddress = (address: string): string => {
-    if (!address) return '';
-    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-  };
-
-  // Handler for wallet connection
-  /*const handleWalletConnect = (walletId: string, address: string) => {
-    console.log(`Connected to ${walletId} wallet with address ${address}`);
-    const wallet = {
-      type: walletId,
-      address: address
-    };
-    setConnectedWallet(wallet);
-    localStorage.setItem('connectedWallet', JSON.stringify(wallet));
-  };*/
+  // Handle wallet connection
   const handleWalletConnect = async (walletId: string) => {
     console.log(`Connecting to ${walletId} wallet`);
     await connect(walletId as any);
