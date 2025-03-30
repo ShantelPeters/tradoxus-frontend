@@ -150,10 +150,14 @@ export function useWallet(): UseWalletReturn {
         if (!window.ethereum) {
           throw new Error("MetaMask is not installed");
         }
+
+        const metamask = (window.ethereum as any).providers.find((provider: any) => provider.isMetaMask);
         
-        const accounts = await window.ethereum.request({
+        const accounts = await metamask.request({
           method: 'eth_requestAccounts'
         });
+
+        console.log("Meta: ", accounts);
         
         if (!accounts || accounts.length === 0) {
           throw new Error("No accounts found");
@@ -173,6 +177,8 @@ export function useWallet(): UseWalletReturn {
         const accounts = await window.coinbaseWalletExtension.request({
           method: 'eth_requestAccounts'
         });
+
+        console.log("Coin: ", accounts);
         
         if (!accounts || accounts.length === 0) {
           throw new Error("No accounts found");
@@ -206,10 +212,50 @@ export function useWallet(): UseWalletReturn {
   };
 
   // Disconnect wallet
-  const disconnect = useCallback(() => {
-    setState(initialState);
-    localStorage.removeItem('connectedWallet');
-  }, []);
+  // const disconnect = useCallback(async () => {
+  //   setState(initialState);
+  //   localStorage.removeItem('connectedWallet');
+  // }, []);
+
+  const disconnect = useCallback(async () => {
+    console.log(state)
+    try {
+      if (state.type === 'stellar' && window.rabet) {
+        await window.rabet.disconnect();
+        console.log("Wallet disconnected")
+      }
+
+      if (state.type === 'metamask' && window.ethereum) {
+        const metamask = (window.ethereum as any).providers.find((provider: any) => provider.isMetaMask);
+        await metamask.request({
+          "method": "wallet_revokePermissions",
+          "params": [
+            {
+              "eth_accounts": {}
+            }
+          ]
+        });
+        console.log("Meta Wallet disconnected")
+      }
+
+      if (state.type === 'coinbase' && window.coinbaseWalletExtension) {
+        console.log("Coin Wallet disconnected")
+        await window.coinbaseWalletExtension.request({
+          "method": "wallet_revokePermissions",
+          "params": [
+            {
+              "eth_accounts": {}
+            }
+          ]
+        });
+      }
+    } catch (error) {
+      console.error("Error during wallet disconnection:", error);
+    } finally {
+      setState(initialState);
+      localStorage.removeItem('connectedWallet');
+    }
+  }, [state]);
 
   return {
     ...state,

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { WalletConnectionModal } from "./walletConnect";
+import { useWallet } from "../../hooks/use-wallet";
 
 // Navigation structure with dropdowns
 const navigationStructure = [
@@ -53,6 +54,14 @@ export function Header() {
   const pathname = usePathname();
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const navRef = useRef<HTMLElement>(null);
+
+  const { 
+    connected, 
+    address, 
+    type: walletType, 
+    connect, 
+    disconnect 
+  } = useWallet();
 
   // Check if a path is active (exact match or child route)
   const isActivePath = (path: string) => {
@@ -123,7 +132,7 @@ export function Header() {
     };
   }, []);
 
-  useEffect(() => {
+  /*useEffect(() => {
     const savedWallet = localStorage.getItem('connectedWallet');
     if (savedWallet) {
       try {
@@ -170,7 +179,7 @@ export function Header() {
   const disconnectWallet = () => {
     setConnectedWallet(null);
     localStorage.removeItem('connectedWallet');
-  };
+  };*/
 
   // Format address for display
   const formatAddress = (address: string): string => {
@@ -179,7 +188,7 @@ export function Header() {
   };
 
   // Handler for wallet connection
-  const handleWalletConnect = (walletId: string, address: string) => {
+  /*const handleWalletConnect = (walletId: string, address: string) => {
     console.log(`Connected to ${walletId} wallet with address ${address}`);
     const wallet = {
       type: walletId,
@@ -187,6 +196,11 @@ export function Header() {
     };
     setConnectedWallet(wallet);
     localStorage.setItem('connectedWallet', JSON.stringify(wallet));
+  };*/
+  const handleWalletConnect = async (walletId: string) => {
+    console.log(`Connecting to ${walletId} wallet`);
+    await connect(walletId as any);
+    setWalletModalOpen(false);
   };
 
   // Style classes
@@ -286,14 +300,14 @@ export function Header() {
 
           {/* Connect Wallet Button or Wallet Info (Desktop) */}
           <div className="hidden md:block">
-            {connectedWallet ? (
+            {connected && address ? (
               <div className="flex items-center">
                 <div className="px-3 py-1 mr-2 rounded bg-[#0d1424] text-[#18b6e8]">
-                  {formatAddress(connectedWallet.address)}
+                  {formatAddress(address)}
                 </div>
                 <button 
                   className="bg-[#18b6e8]/10 text-[#18b6e8] p-2 rounded hover:bg-[#18b6e8]/20 transition"
-                  onClick={disconnectWallet}
+                  onClick={disconnect}
                   title="Disconnect wallet"
                 >
                   <LogOut size={18} />
@@ -369,14 +383,14 @@ export function Header() {
               ))}
 
               {/* Mobile Connect Wallet Button or Wallet Info */}
-              {connectedWallet ? (
+              {connected && address ? (
                 <div className="flex items-center justify-between mt-2 p-3 bg-[#0d1424] rounded-md">
                   <div className="text-[#18b6e8]">
-                    {formatAddress(connectedWallet.address)}
+                    {formatAddress(address)}
                   </div>
                   <button 
                     className="bg-[#18b6e8]/10 text-[#18b6e8] p-2 rounded hover:bg-[#18b6e8]/20 transition"
-                    onClick={disconnectWallet}
+                    onClick={disconnect}
                   >
                     <LogOut size={18} />
                   </button>
