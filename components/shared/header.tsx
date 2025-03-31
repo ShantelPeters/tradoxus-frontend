@@ -148,7 +148,9 @@ export function Header() {
 
   return (
     <>
-      <header className="relative bg-[#050a14] py-4 px-6">
+      <header className={`${
+        pathname.startsWith("/admin/") || pathname === "/admin" ? "hidden" : ""
+      } relative bg-[#050a14] border-b border-gray-800 py-4 px-6`}>
         <div className="flex justify-between items-center relative z-50">
           {/* Logo */}
           <Link href="/" className="text-2xl font-bold text-[#18b6e8]">
