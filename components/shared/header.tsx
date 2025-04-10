@@ -8,6 +8,18 @@ import { WalletConnectionModal } from "./walletConnect";
 import { useWallet } from "../../hooks/use-wallet";
 import { formatAddress } from "../../lib/wallet-utils";
 
+const navLinks = [
+	{ name: "Modules", path: "/modules" },
+	{ name: "Problem", path: "/problem" },
+	{ name: "Solution", path: "/solution" },
+	{ name: "Benefits", path: "/benefits" },
+	{ name: "Gamification", path: "/gamification" },
+	{ name: "Web3", path: "/web3" },
+	{ name: "Dashboard", path: "/dashboard" },
+	{ name: "Profile", path: "/tradingdemo" },
+];
+
+
 // Navigation structure with dropdowns
 const navigationStructure = [
   { name: "Home", path: "/", dropdown: false },
